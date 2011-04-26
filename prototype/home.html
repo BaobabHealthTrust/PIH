@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <title>Home Page</title>
+        <link href="stylesheets/dashboard.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
+
+        <script type="text/javascript" language="javascript" src="javascripts/dashboard.js" ></script>
+        <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+        <script language='javascript' type='text/javascript' src='javascripts/jquery.js'></script>
+        <script language="javascript" type="text/javascript" src="javascripts/jquery.flot.js"></script>
+        <script language="javascript">
+            tstUsername = "";
+            tstCurrentDate = "2010/03/12";
+            tt_cancel_destination = 'index.html';
+            tt_cancel_show = 'patient/registration.html';
+        </script>
+        <link type="text/css" href="stylesheets/graytabs.css" rel="stylesheet" /><link href="stylesheets/touch-fancy.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
+        <script src="javascripts/preload.js?1266397276" type="text/javascript"></script>
+        <!-- Uncomment/Comment the line below to enable/disable the Touchscreen Toolkit-->
+        <script src="javascripts/dateselector.js?1266397276" type="text/javascript"></script>
+        <script src="javascripts/utils.js?1266397276" type="text/javascript"></script>
+    </head>
+    <body><div id='content'>
+            <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
+                <form id = 'home' action=''>
+                    <table cellpadding=10>
+                        <tr>
+                            <th colspan=2>Home Page</th>
+                        </tr>
+                        <h1 id='project_name'>
+                            bart
+                        </h1>
+                        <span id='patient_name'>Test Patient</span>
+                        <span id='patient_id'>P00002</span>
+                        <span id='patient_residence'>18/1453</span>
+                        <span id='patient_age'>34</span>
+                        <span id='patient_gender'>Female</span>
+                        <select id="tabs">
+                            <option value='overview.html'>Overview</option>
+                            <option value='reports.html'>Reports</option>
+                            <option value='properties.html'>Properties</option>
+                            <option value='administration.html'>Administration</option>
+                            <option value='cohort.html'>Cohort</option>
+                        </select>
+                        <select id="links">
+                            <option link='index.html'>Logout</option>
+                            <option link='patient/registration.html' ttSize="320px">Find or Register Patient</option>
+                            <!--option link='dispense.html'>Dispense</option>
+                            <option link='prescribe.html'>Prescribe</option>
+                            <option link='regimen.html'>Regimen</option-->
+                        </select>
+                        <tr>
+                            <td align='center'>
+                                <input type='submit' value='Finish' />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </center>
+        </div>
+    </body>
+</html>
