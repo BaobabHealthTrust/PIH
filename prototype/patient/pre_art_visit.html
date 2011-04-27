@@ -1,36 +1,28 @@
 <html>
     <head>
         <title>Pre-art Visit</title>
-        <link href="../stylesheets/form.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
-
-        <script type="text/javascript" language="javascript" src="../javascripts/touchscreen.js" defer></script>
+        <script type="text/javascript" language="javascript" src="../javascripts/transform.js" defer></script>
         <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
-        <script language='javascript' type='text/javascript' src='../javascripts/jquery.js'></script>
-        <script language="javascript" type="text/javascript" src="../javascripts/jquery.flot.js"></script>
         <script language="javascript">
             tstUsername = "";
             tstCurrentDate = "2010/03/12";
             tt_cancel_destination = 'tasks.html';
             tt_cancel_show = 'show.html';
         </script>
-        <link type="text/css" href="../stylesheets/graytabs.css" rel="stylesheet" />
-        <link href="../stylesheets/touch-fancy.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
-        <script src="../javascripts/preload.js?1266397276" type="text/javascript"></script>
-        <!-- Uncomment/Comment the line below to enable/disable the Touchscreen Toolkit-->
-        <script src="../javascripts/dateselector.js?1266397276" type="text/javascript"></script>
-        <script src="../javascripts/utils.js?1266397276" type="text/javascript"></script>
+        <link href="../stylesheets/styles.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
+        <link href="../stylesheets/dashboard.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
     </head>
     <body><div id='content'>
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-                <form  action='tasks.html'>
-                    <table cellpadding=10>
+                <form  action='tasks.html' extended="true" method="get">
+                    <table cellpadding=10 name="Pre-ART Visit ...(i)">
                         <tr>
                             <th colspan=2>Pre-art Visit</th>
                         </tr>
                         <tr>
                             <td>Is Patient Pregnant?</td>
                             <td>
-                                <select style='width: 100%' name='is_patient_pregnant?' id='is_patient_pregnant?' helptext='Is Patient Pregnant?'>
+                                <select style='width: 100%' position="a" name='is_patient_pregnant?' id='is_patient_pregnant?' helptext='Is Patient Pregnant?'>
                                     <option></option>
                                     <option>Yes</option>
                                     <option>No</option>
@@ -41,7 +33,7 @@
                         <tr>
                             <td>Stage 1 Conditions (adults And Children)</td>
                             <td>
-                                <select style='width: 100%' name='stage_1_conditions_(adults_and_children)' id='stage_1_conditions_(adults_and_children)' helptext='Stage 1 Conditions (adults And Children)'>
+                                <select style='width: 100%' position="b" name='stage_1_conditions_(adults_and_children)' id='stage_1_conditions_(adults_and_children)' helptext='Stage 1 Conditions (adults And Children)'>
                                     <option></option>
                                     <option>Symptomatic HIV infection</option>
                                     <option>Unspecified stage 1 condition</option>
@@ -52,7 +44,7 @@
                         <tr>
                             <td>Stage 2 Conditions (adults And Children)</td>
                             <td>
-                                <select style='width: 100%' name='stage_2_conditions_(adults_and_children)' id='stage_2_conditions_(adults_and_children)' helptext='Stage 2 Conditions (adults And Children)'>
+                                <select style='width: 100%' position="c" name='stage_2_conditions_(adults_and_children)' id='stage_2_conditions_(adults_and_children)' helptext='Stage 2 Conditions (adults And Children)'>
                                     <option></option>
                                     <option>Herpes zoster</option>
                                     <option>Angular cheilitis</option>
@@ -64,7 +56,7 @@
                         <tr>
                             <td>Stage 2 Conditions (adults Only)</td>
                             <td>
-                                <select style='width: 100%' name='stage_2_conditions_(adults_only)' id='stage_2_conditions_(adults_only)' helptext='Stage 2 Conditions (adults Only)'>
+                                <select style='width: 100%' position="d" name='stage_2_conditions_(adults_only)' id='stage_2_conditions_(adults_only)' helptext='Stage 2 Conditions (adults Only)'>
                                     <option></option>
                                     <option>Unintetional weght loss less than or equal to 10 percent in the absence of concurrent illness</option>
                                     <option>Seborrhoeic dermatitis</option>
@@ -72,10 +64,12 @@
                                 </select>
                             </td>
                         </tr>
+                    </table>
+                    <table name="Pre-ART Visit ...(ii)">
                         <tr>
                             <td>Stage 3 Conditions (adults And Children)</td>
                             <td>
-                                <select style='width: 100%' name='stage_3_conditions_(adults_and_children)' id='stage_3_conditions_(adults_and_children)' helptext='Stage 3 Conditions (adults And Children)'>
+                                <select style='width: 100%' position="e" name='stage_3_conditions_(adults_and_children)' id='stage_3_conditions_(adults_and_children)' helptext='Stage 3 Conditions (adults And Children)'>
                                     <option></option>
                                     <option>Oral Hairy leukoplakia</option>
                                     <option>Pulmonary Tuberculosis</option>
@@ -87,7 +81,7 @@
                         <tr>
                             <td>Stage 3 Conditions (adults Only)</td>
                             <td>
-                                <select style='width: 100%' name='stage_3_conditions_(adults_only)' id='stage_3_conditions_(adults_only)' helptext='Stage 3 Conditions (adults Only)'>
+                                <select style='width: 100%' position="f" name='stage_3_conditions_(adults_only)' id='stage_3_conditions_(adults_only)' helptext='Stage 3 Conditions (adults Only)'>
                                     <option></option>
                                     <option>Chronic diarrhoea more than 1 month</option>
                                     <option>Candidiasis, Oral</option>
@@ -99,7 +93,7 @@
                         <tr>
                             <td>Stage 4 Conditions (adults And Children)</td>
                             <td>
-                                <select style='width: 100%' name='stage_4_conditions_(adults_and_children)' id='stage_4_conditions_(adults_and_children)' helptext='Stage 4 Conditions (adults And Children)'>
+                                <select style='width: 100%' position="g" name='stage_4_conditions_(adults_and_children)' id='stage_4_conditions_(adults_and_children)' helptext='Stage 4 Conditions (adults And Children)'>
                                     <option></option>
                                     <option>Kaposisi sarcoma</option>
                                     <option>Encephalopathy</option>
@@ -111,7 +105,7 @@
                         <tr>
                             <td>Stage 4 Conditions (adults Only)</td>
                             <td>
-                                <select style='width: 100%' name='stage_4_conditions_(adults_only)' id='stage_4_conditions_(adults_only)' helptext='Stage 4 Conditions (adults Only)'>
+                                <select style='width: 100%' position="h" name='stage_4_conditions_(adults_only)' id='stage_4_conditions_(adults_only)' helptext='Stage 4 Conditions (adults Only)'>
                                     <option></option>
                                     <option>Severe recurrent bacterial pneumonia</option>
                                     <option>Toxoplasmosis of the brain</option>
@@ -123,19 +117,20 @@
                         <tr>
                             <td>Nutrition Status</td>
                             <td>
-                                <select style='width: 100%' name='nutrition_status' id='nutrition_status' helptext='Nutrition Status'>
+                                <select style='width: 100%' position="i" name='nutrition_status' id='nutrition_status' helptext='Nutrition Status'>
                                     <option></option>
-                                    <option value="N">N.</option>
-                                    <option value="M">M.</option>
-                                    <option value="S">S.</option>
-                                    <option></option>
+                                    <option value="N">N</option>
+                                    <option value="M">M</option>
+                                    <option value="S">S</option>
                                 </select>
                             </td>
                         </tr>
+                    </table>
+                    <table name="Pre-ART Visit ...(iii)">
                         <tr>
                             <td>New Cd4 Count Available?</td>
                             <td>
-                                <select style='width: 100%' name='new_cd4_count_available?' id='new_cd4_count_available?' helptext='New Cd4 Count Available?'>
+                                <select style='width: 100%' position="j" name='new_cd4_count_available?' id='new_cd4_count_available?' helptext='New Cd4 Count Available?'>
                                     <option></option>
                                     <option>Yes</option>
                                     <option>No</option>
@@ -146,31 +141,35 @@
                         <tr>
                             <td>Cd4 Count Location</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='cd4_count_location' id='cd4_count_location' helptext='Cd4 Count Location' />
+                                <input type='text' position="k" value='Text' field_type='text' name='cd4_count_location' id='cd4_count_location' helptext='Cd4 Count Location' />
                             </td>
                         </tr>
                         <tr>
                             <td>Cd4 Count Date</td>
                             <td>
-                                <input type='text' value='' field_type='date' name='cd4_count_date' id='cd4_count_date' helptext='Cd4 Count Date' />
+                                <input type='text' value='' position="l" field_type='date' name='cd4_count_date' id='cd4_count_date' helptext='Cd4 Count Date' />
                             </td>
                         </tr>
                         <tr>
                             <td>Cd4 Count</td>
                             <td>
-                                <input type='text' value='' field_type='number' name='cd4_count' id='cd4_count' helptext='Cd4 Count' />
+                                <input type='text' value='' position="m" field_type='number' name='cd4_count' id='cd4_count' helptext='Cd4 Count' />
                             </td>
                         </tr>
+                    </table>
+                    <table name="Pre-ART Visit ...(iv)">
                         <tr>
                             <td>Clinical Notes (optional)</td>
                             <td>
-                                <input type='text' value='Text' field_type='text' name='clinical_notes_optional' id='clinical_notes_optional' helptext='Clinical Notes (optional)' />
+                                <textarea field_type='text' position="n" name='clinical_notes_optional' id='clinical_notes_optional' helptext='Clinical Notes (optional)' ></textarea>
                             </td>
                         </tr>
+                    </table>
+                    <table name="Pre-ART Visit ...(v)">
                         <tr>
                             <td>Summary</td>
                             <td>
-                                <textarea name='summary' id='summary' helptext='Summary' ></textarea>
+                                <textarea name='summary' position="o" id='summary' helptext='Summary' optional ></textarea>
                             </td>
                         </tr>
                         <tr>
