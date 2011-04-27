@@ -1,89 +1,152 @@
 <html>
     <head>
-        <title>Prevention With Positives</title>
-        <link href="../stylesheets/form.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
-
-        <script type="text/javascript" language="javascript" src="../javascripts/touchscreen.js" defer></script>
+        <title>Art Visit</title>
+        <script type="text/javascript" language="javascript" src="../javascripts/transform.js" defer></script>
         <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
-        <script language='javascript' type='text/javascript' src='../javascripts/jquery.js'></script>
-        <script language="javascript" type="text/javascript" src="../javascripts/jquery.flot.js"></script>
         <script language="javascript">
             tstUsername = "";
             tstCurrentDate = "2010/03/12";
             tt_cancel_destination = 'tasks.html';
             tt_cancel_show = 'show.html';
         </script>
-        <link type="text/css" href="../stylesheets/graytabs.css" rel="stylesheet" />
-        <link href="../stylesheets/touch-fancy.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
-        <script src="../javascripts/preload.js?1266397276" type="text/javascript"></script>
-        <!-- Uncomment/Comment the line below to enable/disable the Touchscreen Toolkit-->
-        <script src="../javascripts/dateselector.js?1266397276" type="text/javascript"></script>
-        <script src="../javascripts/utils.js?1266397276" type="text/javascript"></script>
+        <link href="../stylesheets/transform.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
+        <link href="../stylesheets/dashboard.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
     </head>
     <body><div id='content'>
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-                <form  action=''>
+                <form  action='tasks.html' extended="true" method="get" headerLabel="ART Visit">
                     <table cellpadding=10>
                         <tr>
-                            <th colspan=2>Prevention With Positives</th>
+                            <th colspan=2>Art Visit</th>
                         </tr>
                         <tr>
-                            <td>Sexual Activity</td>
+                            <td>Symptoms - Infections (select All That Apply)</td>
                             <td>
-                                <select style='width: 100%' name='sexual_activity' id='sexual_activity' helptext='Sexual Activity'>
+                                <select position='b' style='width: 100%' name='symptoms_-_infections_select_all_that_apply' id='symptoms_-_infections_select_all_that_apply' helptext='Symptoms - Infections (select All That Apply)'>
                                     <option></option>
-                                    <option>Active</option>
-                                    <option>Not active</option>
+                                    <option>Cough</option>
+                                    <option>Fever</option>
+                                    <option>Headache</option>
+                                    <option>Abdominal pain</option>
+                                    <option>Vomiting</option>
+                                    <option>Diarrhea</option>
+                                    <option>Other</option>
+                                    <option>None</option>
+                                    <option></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Symptoms - Toxicity (select All That Apply)</td>
+                            <td>
+                                <select position='c' style='width: 100%' name='symptoms_-_toxicity_select_all_that_apply' id='symptoms_-_toxicity_select_all_that_apply' helptext='Symptoms - Toxicity (select All That Apply)'>
+                                    <option></option>
+                                    <option>Pain in legs</option>
+                                    <option>Numbness</option>
+                                    <option>Rash</option>
+                                    <option>Yellow eyes</option>
+                                    <option>Other</option>
+                                    <option>None</option>
+                                    <option></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Symptoms - Tb (select All That Apply)</td>
+                            <td>
+                                <select position='d' style='width: 100%' name='symptoms_-_tb_select_all_that_apply' id='symptoms_-_tb_select_all_that_apply' helptext='Symptoms - Tb (select All That Apply)'>
+                                    <option></option>
+                                    <option>Cough > 3 weeks</option>
+                                    <option>Persistent Fever</option>
+                                    <option>Night sweats</option>
+                                    <option>weight loss</option>
+                                    <option>Enlarged gland</option>
+                                    <option>TB contact</option>
+                                    <option>Other</option>
+                                    <option>None</option>
+                                    <option></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Symptoms - Sti (select All That Apply)</td>
+                            <td>
+                                <select position='e' style='width: 100%' name='symptoms_-_sti_select_all_that_apply' id='symptoms_-_sti_select_all_that_apply' helptext='Symptoms - Sti (select All That Apply)'>
+                                    <option></option>
+                                    <option>Pelvic pain</option>
+                                    <option>Vaginal/ Urethral discharge</option>
+                                    <option>Pain with intercourse</option>
+                                    <option>Genital lesions</option>
+                                    <option>pain with urinating</option>
+                                    <option>Other</option>
+                                    <option>None</option>
+                                    <option></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Adverse Effects (select All That Apply)</td>
+                            <td>
+                                <select position='f' style='width: 100%' name='adverse_effects_select_all_that_apply' id='adverse_effects_select_all_that_apply' helptext='Adverse Effects (select All That Apply)'>
+                                    <option></option>
+                                    <option>Skin rash</option>
+                                    <option>Peripheral neuropathy</option>
+                                    <option></option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <td>Tb Status</td>
+                            <td>
+                                <select position='g' style='width: 100%' name='tb_status' id='tb_status' helptext='Tb Status'>
+                                    <option></option>
+                                    <option>TB not suspected</option>
+                                    <option>Confirmed TB not on treatment</option>
+                                    <option>Susp</option>
+                                    <option>RX</option>
                                     <option>Unknown</option>
                                     <option></option>
                                 </select>
                             </td>
                         </tr>
                         <tr>
-                            <td>Partners' Status</td>
+                            <td>Nutrition Status</td>
                             <td>
-                                <select style='width: 100%' name='partners'_status' id='partners'_status' helptext='Partners' Status'>
-                                        <option></option>
-                                    <option>Negative</option>
-                                    <option>Positive</option>
-                                    <option>Unknown</option>
+                                <select position='h' style='width: 100%' name='nutrition_status' id='nutrition_status' helptext='Nutrition Status'>
+                                    <option></option>
+                                    <option>N</option>
+                                    <option>M</option>
+                                    <option>S</option>
                                     <option></option>
                                 </select>
                             </td>
                         </tr>
+                    </table>
+                    <table>
                         <tr>
-                            <td>Last Test Date</td>
+                            <td>Pills Missed Last Month</td>
                             <td>
-                                <input type='text' value='' field_type='date' name='last_test_date' id='last_test_date' helptext='Last Test Date' />
+                                <input type='text' position='i' value='' field_type='number' name='pills_missed_last_month' id='pills_missed_last_month' helptext='Pills Missed Last Month' />
                             </td>
                         </tr>
                         <tr>
-                            <td>Sti</td>
+                            <td>Reason For Missed Pills</td>
                             <td>
-                                <select style='width: 100%' name='sti' id='sti' helptext='Sti'>
-                                    <option></option>
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                    <option>Unknown</option>
-                                    <option></option>
-                                </select>
+                                <input type='text' position='j' value='Text' field_type='text' name='reason_for_missed_pills' id='reason_for_missed_pills' helptext='Reason For Missed Pills' />
                             </td>
                         </tr>
                         <tr>
-                            <td>Family Planning Needs</td>
+                            <td>Total Number Of Pills Remaining</td>
                             <td>
-                                <select style='width: 100%' name='family_planning_needs' id='family_planning_needs' helptext='Family Planning Needs'>
-                                    <option></option>
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                    <option></option>
-                                </select>
+                                <input type='text' position='k' value='' field_type='number' name='total_number_of_pills_remaining' id='total_number_of_pills_remaining' helptext='Total Number Of Pills Remaining' />
                             </td>
                         </tr>
                         <tr>
-                            <td>Family Planning Needs</td>
+                            <td>Prescribe Arvs This Visit?</td>
                             <td>
-                                <select style='width: 100%' name='family_planning_needs' id='family_planning_needs' helptext='Family Planning Needs'>
+                                <select position='l' style='width: 100%' name='prescribe_arvs_this_visit?' id='prescribe_arvs_this_visit?' helptext='Prescribe Arvs This Visit?'>
                                     <option></option>
                                     <option>Yes</option>
                                     <option>No</option>
@@ -91,66 +154,12 @@
                                 </select>
                             </td>
                         </tr>
+                    </table>
+                    <table>
                         <tr>
-                            <td>Art Adherence</td>
+                            <td>Clinical Notes (optional)</td>
                             <td>
-                                <input type='text' value='' field_type='number' name='art_adherence' id='art_adherence' helptext='Art Adherence' />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Need For Plwha Group</td>
-                            <td>
-                                <select style='width: 100%' name='need_for_plwha_group' id='need_for_plwha_group' helptext='Need For Plwha Group'>
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                    <option>Unknown</option>
-                                    <option></option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Provided Condoms</td>
-                            <td>
-                                <select style='width: 100%' name='provided_condoms' id='provided_condoms' helptext='Provided Condoms'>
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                    <option>Unknown</option>
-                                    <option></option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Provided Contraceptive</td>
-                            <td>
-                                <select style='width: 100%' name='provided_contraceptive' id='provided_contraceptive' helptext='Provided Contraceptive'>
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                    <option>Unknown</option>
-                                    <option></option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Provided Counseling</td>
-                            <td>
-                                <select style='width: 100%' name='provided_counseling' id='provided_counseling' helptext='Provided Counseling'>
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                    <option>Unknown</option>
-                                    <option></option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Referred For:</td>
-                            <td>
-                                <select style='width: 100%' name='referred_for:' id='referred_for:' helptext='Referred For:'>
-                                    <option></option>
-                                    <option>Partner testing</option>
-                                    <option>STI treatment</option>
-                                    <option>Patient support group</option>
-                                    <option></option>
-                                </select>
+                                <textarea position='m' name='clinical_notes_optional' id='clinical_notes_optional' helptext='Clinical Notes (optional)'></textarea>
                             </td>
                         </tr>
                         <tr>

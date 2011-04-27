@@ -7,6 +7,7 @@ var elements = {};
 var elementIDs = [];
 var sections = null;
 var tstCurrentPage = 0;
+var remoteNavigation = false;
 
 // utilities.js
 var global_control = null;
@@ -932,7 +933,7 @@ function getSections(){
 }
 
 function navigateTo(section){
-    if($("frmAnswers") && section <= sections.length){
+    if($("frmAnswers") && section <= sections.length && remoteNavigation == false){
         var element = $("frmAnswers").elements;
 
         for(var i = 0; i < element.length; i++){
@@ -953,13 +954,15 @@ function navigateTo(section){
         }
 
         $("content").removeChild($("cntr"));
+    } else if(remoteNavigation == true) {
+        $("content").removeChild($("cntr"));
     }
-     
+
+    remoteNavigation = false;
+    
     if(tstCurrentPage == sections.length){
-        //$("content").removeChild($("cntr"));
         showSummary();
     } else if(section > (sections.length)){
-        $("content").removeChild($("cntr"));
         document.forms[0].submit();
     } else {
         transformPage(section);
@@ -990,6 +993,7 @@ function transformPage(section){
     //into formElements
     for(var i = 0; i < selects.length; i++){
         selects[i].setAttribute("field_type", "select");
+        selects[i].setAttribute("section", section);
 
         if(!elements[selects[i].id]){
             elements[selects[i].id] = true;
@@ -1002,6 +1006,7 @@ function transformPage(section){
 
     for(var i = 0; i < textareas.length; i++){
         textareas[i].setAttribute("field_type", "textarea");
+        textareas[i].setAttribute("section", section);
 
         if(!elements[textareas[i].id]){
             elements[textareas[i].id] = true;
@@ -1015,6 +1020,8 @@ function transformPage(section){
     for(var i = 0; i < inputs.length; i++){
         if(inputs[i].type != "hidden"){
 
+            inputs[i].setAttribute("section", section);
+            
             if(!elements[inputs[i].id]){
                 elements[inputs[i].id] = true;
                 elementIDs.push([inputs[i].getAttribute("position"), inputs[i].id]);
@@ -1073,7 +1080,8 @@ function generatePage(action, method, section){
     document.forms[0].style.display = "none";
 
     var cntr = document.createElement("div");
-    var headerText = (sections[section].getAttribute("name") ? sections[section].getAttribute("name") : "&nbsp;");
+    var headerText = (document.forms[0].getAttribute("headerLabel") ? document.forms[0].getAttribute("headerLabel") : "&nbsp;") +
+        " - (" + (tstCurrentPage + 1) + " of " + sections.length + ")";
     cntr.id = "cntr";
 
     $("content").appendChild(cntr);
@@ -1217,7 +1225,6 @@ function generatePage(action, method, section){
             input.type = "text";
             input.className = "labelText textInput";
             input.style.width = "100%";
-            input.setAttribute("optional", "true");
             input.onchange = function(){
                 if(!this.value.trim().match(/^$/)){
                     this.className = "availableValue labelText textInput";
@@ -1289,7 +1296,7 @@ function generatePage(action, method, section){
                 found_long = false;
 
                 for(var o = 0; o < $(el).options.length; o++){
-                    if($(el).options[o].innerHTML.length > 5) {
+                    if($(el).options[o].innerHTML.length > 7) {
                         found_long = true;
                         break;
                     }
@@ -1333,13 +1340,13 @@ function generatePage(action, method, section){
             found_long = false;
 
             for(var o = 0; o < $(el).options.length; o++){
-                if($(el).options[o].innerHTML.length > 5) {
+                if($(el).options[o].innerHTML.length > 7) {
                     found_long = true;
                     break;
                 }
             }
 
-            if($(el).options.length <= 4 && found_long == false){
+            if($(el).options.length <= 7 && found_long == false){
 
                 var button_table = document.createElement("table");
                 button_table.style.cssFloat = "right";
@@ -1452,7 +1459,7 @@ function checkFields(){
     }
 
     for(var i = 0; i < formInputs.length; i++){
-        if(formInputs[i].getAttribute("optional") != null){
+        if(formInputs[i].getAttribute("optional") == null){
             if(formInputs[i].value.trim().length <= 0){
                 alert("Missing value in non-optional question!");
                 formInputs[i].className = "missingValue labelText textInput";
@@ -1575,11 +1582,13 @@ function createCalendarHTML(){
 }
 
 function showSummary(){
-
+    remoteNavigation = true;
+    
     document.forms[0].style.display = "none";
 
     var cntr = document.createElement("div");
-    var headerText = "Entries Summary";
+    var headerText = (document.forms[0].getAttribute("headerLabel") ? document.forms[0].getAttribute("headerLabel") : "&nbsp;") +
+        " Summary";
     cntr.id = "cntr";
 
     $("content").appendChild(cntr);
@@ -1701,6 +1710,8 @@ function showSummary(){
 
     elementIDs.sort();
 
+    var pages = {};
+
     for(var el = 0; el < elementIDs.length; el++){
         var tr = document.createElement("tr");
         var td1 = document.createElement("td");
@@ -1713,12 +1724,22 @@ function showSummary(){
         td1.className = "labelText";
 
         if($(elementIDs[el][1])){
-            console.log(elementIDs[el][1]);
+            if(!pages[$(elementIDs[el][1]).getAttribute("section")]){
+                pages[$(elementIDs[el][1]).getAttribute("section")] = [el];
+            } else {
+                pages[$(elementIDs[el][1]).getAttribute("section")].push(el);
+            }
             
-            td1.innerHTML = "(" + (el) + "). <span style='text-decoration: underline;'>" +
+            td1.innerHTML = "<div style='padding: 10px; color: #333;'><div class='question'>(" +
+                (parseInt($(elementIDs[el][1]).getAttribute("section")) + 1) + "." +
+                pages[$(elementIDs[el][1]).getAttribute("section")].length +
+                "). <a href='#' onclick='tstCurrentPage = " +
+                $(elementIDs[el][1]).getAttribute("section") + "; navigateTo(" +
+                $(elementIDs[el][1]).getAttribute("section") + ");'>" +
                 ($(elementIDs[el][1]).getAttribute("helpText") != null ?
-                $(elementIDs[el][1]).getAttribute("helpText") : "") + "</span> : <i style='color: blue;'>" +
-                $(elementIDs[el][1]).value + "</i>";
+                $(elementIDs[el][1]).getAttribute("helpText") : "") + "</a> :</div> <div class='summary'><i>" +
+                ($(elementIDs[el][1]).value.trim().length > 0 ? $(elementIDs[el][1]).value : "&nbsp;") +
+                "</i></div></div>";
         }
     }
 

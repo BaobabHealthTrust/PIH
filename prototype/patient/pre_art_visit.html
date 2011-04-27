@@ -9,13 +9,13 @@
             tt_cancel_destination = 'tasks.html';
             tt_cancel_show = 'show.html';
         </script>
-        <link href="../stylesheets/styles.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
+        <link href="../stylesheets/transform.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
         <link href="../stylesheets/dashboard.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
     </head>
     <body><div id='content'>
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-                <form  action='tasks.html' extended="true" method="get">
-                    <table cellpadding=10 name="Pre-ART Visit ...(i)">
+                <form  action='tasks.html' extended="true" method="get" headerLabel="Pre-ART Visit">
+                    <table cellpadding=10 name="Pre-ART Visit">
                         <tr>
                             <th colspan=2>Pre-art Visit</th>
                         </tr>
@@ -65,7 +65,7 @@
                             </td>
                         </tr>
                     </table>
-                    <table name="Pre-ART Visit ...(ii)">
+                    <table name="Pre-ART Visit">
                         <tr>
                             <td>Stage 3 Conditions (adults And Children)</td>
                             <td>
@@ -126,7 +126,7 @@
                             </td>
                         </tr>
                     </table>
-                    <table name="Pre-ART Visit ...(iii)">
+                    <table name="Pre-ART Visit">
                         <tr>
                             <td>New Cd4 Count Available?</td>
                             <td>
@@ -157,19 +157,20 @@
                             </td>
                         </tr>
                     </table>
-                    <table name="Pre-ART Visit ...(iv)">
+                    <table name="Pre-ART Visit">
                         <tr>
                             <td>Clinical Notes (optional)</td>
                             <td>
-                                <textarea field_type='text' position="n" name='clinical_notes_optional' id='clinical_notes_optional' helptext='Clinical Notes (optional)' ></textarea>
+                                <textarea field_type='text' position="n" name='clinical_notes_optional' 
+                                          id='clinical_notes_optional' helptext='Clinical Notes (optional)' optional></textarea>
                             </td>
                         </tr>
                     </table>
-                    <table name="Pre-ART Visit ...(v)">
+                    <table name="Pre-ART Visit">
                         <tr>
                             <td>Summary</td>
                             <td>
-                                <textarea name='summary' position="o" id='summary' helptext='Summary' optional ></textarea>
+                                <textarea name='summary' position="o" id='summary' helptext='Summary' ></textarea>
                             </td>
                         </tr>
                         <tr>

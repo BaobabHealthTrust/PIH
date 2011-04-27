@@ -277,3 +277,39 @@ button:hover.dark span {
     color: #000;
     font-weight: normal;
 }
+
+a:link {
+	color: #000000;
+	text-decoration: none;
+}
+a:visited {
+	text-decoration: none;
+	color: #000000;
+}
+a:hover {
+	text-decoration: none;
+	color: #000000;
+}
+a:active {
+	text-decoration: none;
+	color: #000000;
+}
+
+.question {
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    background-color: #eee;
+    padding: 10px;
+    padding-bottom: 40px;
+}
+
+.summary {
+    margin-left:70px;
+    width: 89.35%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    -moz-border-radius: 10px;
+    padding: 10px;
+    margin-top: -32px;
+    color: #000;
+}
