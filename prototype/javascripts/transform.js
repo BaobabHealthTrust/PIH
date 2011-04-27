@@ -3,6 +3,11 @@
 */
 
 var actualElements = {};
+var elements = {};
+var elementIDs = [];
+var sections = null;
+var tstCurrentPage = 0;
+
 // utilities.js
 var global_control = null;
 var full_keyboard = false;
@@ -377,7 +382,7 @@ function showKeyboard(id){
     var row1 = ["Q","W","E","R","T","Y","U","I","O","P"];
     var row2 = ["A","S","D","F","G","H","J","K","L",":"];
     var row3 = ["Z","X","C","V","B","N","M",",",".","?"];
-    var row4 = ["cap","space","clear",(full_keyboard?"basic":"full")];
+    var row4 = ["cap","space","clear",(full_keyboard?"enter":""),(full_keyboard?"basic":"full")];
     var row5 = ["1","2","3","4","5","6","7","8","9","0"];
     var row6 = ["_","-","@","(",")","+",";","=","\\","/"];
 
@@ -540,7 +545,7 @@ function showKeyboard(id){
                 td4.colSpan = 2;
                 break;
             case "space":
-                td4.colSpan = 4;
+                td4.colSpan = 2;
                 break;
             case "clear":
                 td4.colSpan = 2;
@@ -552,7 +557,7 @@ function showKeyboard(id){
         tr4.appendChild(td4);
 
         var btn = document.createElement("button");
-        btn.innerHTML = "<span>" + row4[i] + "</span>";
+        btn.innerHTML = (row4[i].trim().length > 0 ? "<span>" + row4[i] + "</span>" : "");
         btn.onclick = function(){
             if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "cap"){
                 if(this.innerHTML.match(/<span>(.+)<\/span>/)[1] == "cap"){
@@ -590,6 +595,10 @@ function showKeyboard(id){
                     }
 
                 }
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1] == "enter"){
+                if(!this.innerHTML.match(/^$/)){
+                    $(global_control).value += "\n";
+                }
             } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "space"){
 
                 $(global_control).value += " ";
@@ -617,8 +626,12 @@ function showKeyboard(id){
             }
         }
 
-        td4.appendChild(btn);
-
+        if(row4[i].trim().length > 0) {
+            td4.appendChild(btn);
+        } else {
+            td4.innerHTML = "&nbsp;";
+        }
+        
     }
 
     tbl.appendChild(tr4);
@@ -727,7 +740,6 @@ function showNumber(id){
         td2.style.cursor = "pointer";
         td2.bgColor = "#ffffff";
         td2.width = "30px";
-        td2.className = "blue";
 
         tr2.appendChild(td2);
 
@@ -755,7 +767,6 @@ function showNumber(id){
         td3.style.cursor = "pointer";
         td3.bgColor = "#ffffff";
         td3.width = "30px";
-        td3.className = "blue";
 
         tr3.appendChild(td3);
 
@@ -783,7 +794,6 @@ function showNumber(id){
         td4.style.cursor = "pointer";
         td4.bgColor = "#ffffff";
         td4.width = "30px";
-        td4.className = "blue";
 
         tr4.appendChild(td4);
 
@@ -898,6 +908,9 @@ function showMenu(id, original_id){
 
     sel.onclick = function(){
         $(id).value = this[this.selectedIndex].innerHTML;
+
+        $(id).className = "availableValue labelText textInput";
+            
         document.body.removeChild($("divMenu"));
     }
 
@@ -914,24 +927,125 @@ function showMenu(id, original_id){
     }
 }
 
-function transformPage(){
-    var formElements = document.forms[0].elements;
+function getSections(){
+    return document.forms[0].getElementsByTagName("table");
+}
+
+function navigateTo(section){
+    if($("frmAnswers") && section <= sections.length){
+        var element = $("frmAnswers").elements;
+
+        for(var i = 0; i < element.length; i++){
+            if(String(element[i].id).match(/secondary_(.+)/)){
+                var id = String(element[i].id).match(/secondary_(.+)/)[1];
+
+                if($(id).tagName.toLowerCase() == "select"){
+                    for(var j = 0; j < $(id).options.length; j++){
+                        if(element[i].value.toLowerCase() == $(id).options[j].innerHTML.toLowerCase()){
+                            $(id).selectedIndex = j;
+                            break;
+                        }
+                    }
+                } else {
+                    $(id).value = element[i].value;
+                }
+            }
+        }
+
+        $("content").removeChild($("cntr"));
+    }
+     
+    if(tstCurrentPage == sections.length){
+        //$("content").removeChild($("cntr"));
+        showSummary();
+    } else if(section > (sections.length)){
+        $("content").removeChild($("cntr"));
+        document.forms[0].submit();
+    } else {
+        transformPage(section);
+    }
+}
+
+function transformPage(section){
+    if(!sections) return;
+
+    if(sections.length <= 0) return;
+
+    if(section < 0){
+        section = 0;
+    } else if(section >= sections.length){
+        section = sections.length - 1;
+    }
+
+    actualElements = {};
+    var inputs = sections[section].getElementsByTagName("input");
+    var selects = sections[section].getElementsByTagName("select");
+    var textareas = sections[section].getElementsByTagName("textarea");
+
+    var formElements = [];
+
+    //Push:      i. Question position
+    //          ii. Pass control object
+    //         iii. Check if question optional
+    //into formElements
+    for(var i = 0; i < selects.length; i++){
+        selects[i].setAttribute("field_type", "select");
+
+        if(!elements[selects[i].id]){
+            elements[selects[i].id] = true;
+            elementIDs.push([selects[i].getAttribute("position"), selects[i].id]);
+        }
+        
+        formElements.push([selects[i].getAttribute("position"), selects[i],
+            (selects[i].getAttribute("optional") != null ? true : false)]);
+    }
+
+    for(var i = 0; i < textareas.length; i++){
+        textareas[i].setAttribute("field_type", "textarea");
+
+        if(!elements[textareas[i].id]){
+            elements[textareas[i].id] = true;
+            elementIDs.push([textareas[i].getAttribute("position"), textareas[i].id]);
+        }
+
+        formElements.push([textareas[i].getAttribute("position"), textareas[i],
+            (textareas[i].getAttribute("optional") != null ? true : false)]);
+    }
+
+    for(var i = 0; i < inputs.length; i++){
+        if(inputs[i].type != "hidden"){
+
+            if(!elements[inputs[i].id]){
+                elements[inputs[i].id] = true;
+                elementIDs.push([inputs[i].getAttribute("position"), inputs[i].id]);
+            }
+        
+            formElements.push([inputs[i].getAttribute("position"), inputs[i],
+                (inputs[i].getAttribute("optional") != null ? true : false)]);
+        }
+    }
+
+    formElements.sort();
 
     for(var i = 0; i < formElements.length; i++){
-        if(formElements[i].tagName != "BUTTON"){
-            if(formElements[i].tagName == "INPUT"){
-                if(formElements[i].type != "button"){
-                    actualElements[formElements[i].id] = [formElements[i],
-                    getLabel(formElements[i].id), formElements[i].getAttribute("field_type")];
+        if(formElements[i][1].tagName != "BUTTON"){
+            if(formElements[i][1].tagName == "INPUT"){
+                if(formElements[i][1].type != "button" && formElements[i][1].type != "submit" &&
+                    formElements[i][1].type != "reset"){
+                    actualElements[formElements[i][1].id] = [formElements[i],
+                    getLabel(formElements[i][1].id), formElements[i][1].getAttribute("field_type"), formElements[i][2]];
                 }
+            } else if(formElements[i][1].tagName == "TEXTAREA"){
+                actualElements[formElements[i][1].id] = [formElements[i],
+                getLabel(formElements[i][1].id), formElements[i][1].getAttribute("field_type"), formElements[i][2]];
             } else {
-                actualElements[formElements[i].id] = [formElements[i],
-                getLabel(formElements[i].id), formElements[i].getAttribute("field_type")];
+                actualElements[formElements[i][1].id] = [formElements[i][1],
+                getLabel(formElements[i][1].id), formElements[i][1].getAttribute("field_type"), formElements[i][2]];
             }
         }
     }
 
-    generatePage(document.forms[0].action, document.forms[0].method);
+    generatePage(document.forms[0].action, document.forms[0].method, section);
 }
 
 function getLabel(id){
@@ -954,47 +1068,53 @@ function getLabel(id){
     return "";
 }
 
-function generatePage(action, method){
+function generatePage(action, method, section){
 
     document.forms[0].style.display = "none";
 
-    var cntr = document.createElement("center");
+    var cntr = document.createElement("div");
+    var headerText = (sections[section].getAttribute("name") ? sections[section].getAttribute("name") : "&nbsp;");
     cntr.id = "cntr";
 
-    document.body.appendChild(cntr);
+    $("content").appendChild(cntr);
 
     var divmain = document.createElement("div");
     divmain.id = "divmain";
 
     cntr.appendChild(divmain);
 
+    var divheader = document.createElement("div");
+    divheader.id = "divheader";
+    divheader.innerHTML = headerText;
+
+    divmain.appendChild(divheader);
+
     var divcontent = document.createElement("div");
     divcontent.id = "divcontent";
-    divcontent.style.padding = "10px";
-    divcontent.style.overflow = "hidden";
 
     divmain.appendChild(divcontent);
 
     var divInside = document.createElement("div");
     divInside.id = "divScroller";
-    divInside.style.overflow = "auto";
-    divInside.style.width = "100%"
-    divInside.style.height = "100%"
 
     divcontent.appendChild(divInside);
 
     var divnav = document.createElement("div");
-    divnav.id = "divnav";
+    divnav.id = "footer";
 
     divmain.appendChild(divnav);
 
     var btnNext = document.createElement("button");
     btnNext.id = "btnNext";
-    btnNext.innerHTML = "<span>Next</span>";
+    btnNext.innerHTML = (tstCurrentPage >= sections.length ? "<span>Finish</span>" : "<span>Next</span>");
     btnNext.style.cssFloat = "right";
     btnNext.className = "green navButton";
     btnNext.onclick = function(){
-        $("frmAnswers").submit();
+        if(checkFields()){
+            tstCurrentPage += 1;
+            navigateTo(tstCurrentPage);
+            $("btnNext").innerHTML = (tstCurrentPage >= sections.length ? "<span>Finish</span>" : "<span>Next</span>");
+        }
     }
 
     divnav.appendChild(btnNext);
@@ -1003,12 +1123,42 @@ function generatePage(action, method){
     btnClear.id = "btnClear";
     btnClear.innerHTML = "<span>Clear</span>";
     btnClear.style.cssFloat = "right";
-    btnClear.className = "gray navButton";
+    btnClear.className = "blue navButton";
     btnClear.onclick = function(){
         $("frmAnswers").reset();
+        var formButtons = $("frmAnswers").getElementsByTagName("button");
+        var relevantButtons = {};
+
+        for(var b = 0; b < formButtons.length; b++){
+            if(!relevantButtons[formButtons[b].getAttribute("initial_id")]){
+                relevantButtons[formButtons[b].getAttribute("initial_id")] = true;
+            }
+        }
+
+        for(var btn in relevantButtons){
+            $(btn).selectedIndex = -1;
+            var buttons = document.getElementsByName(btn + "_buttons");
+
+            for(var e = 0; e < buttons.length; e++){
+                buttons[e].className = "blue";
+            }
+        }
     }
 
     divnav.appendChild(btnClear);
+
+    var btnBack = document.createElement("button");
+    btnBack.id = "btnBack";
+    btnBack.innerHTML = "<span>Back</span>";
+    btnBack.style.cssFloat = "right";
+    btnBack.className = "blue navButton";
+    btnBack.style.display = (tstCurrentPage > 0 ? "block" : "none");
+    btnBack.onclick = function(){
+        tstCurrentPage -= 1;
+        navigateTo(tstCurrentPage);
+    }
+
+    divnav.appendChild(btnBack);
 
     var btnCancel = document.createElement("button");
     btnCancel.id = "btnCancel";
@@ -1016,10 +1166,10 @@ function generatePage(action, method){
     btnCancel.style.cssFloat = "left";
     btnCancel.className = "red navButton";
     btnCancel.onclick = function(){
-        if(tt_cancelDestination){
-            window.location = tt_cancelDestination;
+        if(tt_cancel_destination){
+            window.location = tt_cancel_destination;
         } else {
-            document.body.removeChild($("cntr"));
+            $("content").removeChild($("cntr"));
             document.forms[0].style.display = "block";
         }
     }
@@ -1036,8 +1186,8 @@ function generatePage(action, method){
 
     var tbl = document.createElement("table");
     tbl.width = "95%";
-    tbl.cellSpacing = 10;
-    tbl.cellPadding = 5;
+    tbl.cellSpacing = 1;
+    tbl.cellPadding = 2;
 
     frm.appendChild(tbl);
 
@@ -1045,11 +1195,14 @@ function generatePage(action, method){
 
     tbl.appendChild(tbody);
 
+    var textThere = false;
+
     for(var el in actualElements){
         var tr = document.createElement("tr");
         var td1 = document.createElement("td");
         var td2 = document.createElement("td");
-
+        var found_long = false;
+        
         tbody.appendChild(tr);
         tr.appendChild(td1);
         tr.appendChild(td2);
@@ -1057,10 +1210,35 @@ function generatePage(action, method){
         td1.className = "labelText";
         td1.innerHTML = actualElements[el][1];
 
-        var input = document.createElement("input");
-        input.type = "text";
-        input.style.width = "100%";
-        input.className = "labelText textInput";
+        var controlType = actualElements[el][2];
+        
+        var input = document.createElement((controlType == "textarea" ? "textarea" : "input"));
+        if(controlType != "textarea"){
+            input.type = "text";
+            input.className = "labelText textInput";
+            input.style.width = "100%";
+            input.setAttribute("optional", "true");
+            input.onchange = function(){
+                if(!this.value.trim().match(/^$/)){
+                    this.className = "availableValue labelText textInput";
+                }
+            }
+        } else {
+            input.className = "labelText textInput";
+            input.style.height = "250px";
+            input.style.width = "600px";
+            input.style.cssFloat = "right";
+            input.onchange = function(){
+                if(!this.value.trim().match(/^$/)){
+                    this.className = "availableValue labelText textInput";
+                }
+            }
+        }
+
+        if(actualElements[el][3] == true){
+            input.setAttribute("optional", "true");
+        }
+        
         input.id = "secondary_" + el;
         input.name = "secondary_" + el;
         input.setAttribute("initial_id", el)
@@ -1070,55 +1248,488 @@ function generatePage(action, method){
                 input.onclick = function(){
                     if($('divMenu')){
                         document.body.removeChild($('divMenu'));
+                        if(!this.value.trim().match(/^$/)){
+                            this.className = "availableValue labelText textInput";
+                        }
                     } else {
                         showNumber(this.id);
                     }
                 }
+                textThere = true;
                 break;
             case "year":
                 input.onclick = function(){
                     if($('divMenu')){
                         document.body.removeChild($('divMenu'));
+                        if(!this.value.trim().match(/^$/)){
+                            this.className = "availableValue labelText textInput";
+                        }
                     } else {
                         showYear(this.id);
                     }
                 }
+                textThere = true;
                 break;
             case "date":
                 //input.className = "input-date";
                 input.onclick = function(){
                     if($('divMenu')){
                         document.body.removeChild($('divMenu'));
+                        if(!this.value.trim().match(/^$/)){
+                            this.className = "availableValue labelText textInput";
+                        }
                     } else {
                         showCalendar(this.id);
                     }
                 }
+                textThere = true;
                 break;
             case "select":
-                input.onclick = function(){
-                    if($('divMenu')){
-                        document.body.removeChild($('divMenu'));
-                    } else {
-                        showMenu(this.id, this.getAttribute("initial_id"));
+                //Check if select control options have long values
+                found_long = false;
+
+                for(var o = 0; o < $(el).options.length; o++){
+                    if($(el).options[o].innerHTML.length > 5) {
+                        found_long = true;
+                        break;
                     }
                 }
+
+                // Check if select control options are greater than 3
+                if($(el).options.length > 4 || found_long == true) {
+                    input.onclick = function(){
+                        if($('divMenu')){
+                            document.body.removeChild($('divMenu'));
+                        } else {
+                            showMenu(this.id, this.getAttribute("initial_id"));
+                        }
+                    }
+                }
+
                 break;
             default:
                 input.onclick = function(){
                     if($('divMenu')){
                         document.body.removeChild($('divMenu'));
+                        if(!this.value.trim().match(/^$/)){
+                            this.className = "availableValue labelText textInput";
+                        }
                     } else {
                         showKeyboard(this.id);
                     }
                 }
+                textThere = true;
                 break;
         }
 
-        if($(el))
+        if(!el.match(/^(\s+)?$/)){
             input.value = $(el).value;
+        }
 
-        td2.appendChild(input);
+        // Add buttons if options are less than 3
+        if($(el).tagName == "SELECT"){
+
+            //Check if select control options have long values
+            found_long = false;
+
+            for(var o = 0; o < $(el).options.length; o++){
+                if($(el).options[o].innerHTML.length > 5) {
+                    found_long = true;
+                    break;
+                }
+            }
+
+            if($(el).options.length <= 4 && found_long == false){
+
+                var button_table = document.createElement("table");
+                button_table.style.cssFloat = "right";
+                button_table.style.minWidth = "150px";
+
+                var button_tr = document.createElement("tr");
+                button_table.appendChild(button_tr);
+
+                for(var i = 0; i < $(el).options.length; i++){
+                    if($(el).options[i].innerHTML.length > 0){
+                        var button_td = document.createElement("td");
+                        button_tr.appendChild(button_td);
+
+                        var button = document.createElement("button");
+                        button.className = (unescape($(el).value) == unescape($(el).options[i].innerHTML) ? "green" : "blue");
+                        button.innerHTML = "<span>" + unescape($(el).options[i].innerHTML) + "</span>";
+                        button.value = $(el).options[i].value;
+                        button.id = el + "_" + $(el).options[i].value;
+                        button.name = el + "_buttons";
+                        button.setAttribute("initial_id", el)
+
+                        button.onclick = function(){
+                            var btns = document.getElementsByName(this.name);
+
+                            for(var b = 0; b < btns.length; b++){
+                                if(btns[b].id == this.id){
+                                    btns[b].className = "green";
+
+                                    for(var w = 0; w < $(this.getAttribute("initial_id")).options.length; w++){
+                                        if($(this.getAttribute("initial_id")).options[w].innerHTML == this.value &&
+                                            !$(this.getAttribute("initial_id")).options[w].innerHTML.match(/^$/)){
+
+                                            $(this.getAttribute("initial_id")).selectedIndex = w;
+                                            break;
+                                            
+                                        }
+                                    }
+                                    
+                                } else {
+                                    btns[b].className = "blue";
+                                }
+                            }
+                            return false;
+                        }
+
+                        button_td.appendChild(button);
+                    }
+                }
+
+                td2.appendChild(button_table);
+
+            } else {
+
+                td2.appendChild(input);
+
+            }
+
+        } else {
+            td2.appendChild(input);
+        }
+
     }
+
+    var spacer = document.createElement("div");
+
+    if(textThere == true){
+        spacer.style.height = "400px";
+    }
+
+    $("divScroller").appendChild(spacer);
+
 }
 
-window.addEventListener("load", transformPage, false);
+function checkFields(){
+    if(!$("frmAnswers")){
+        alert("No form to check! Returning!");
+        return false;
+    }
+
+    var formInputs = $("frmAnswers").getElementsByTagName("input");
+    var formTextAreas = $("frmAnswers").getElementsByTagName("textarea");
+    var formButtons = $("frmAnswers").getElementsByTagName("button");
+    var relevantButtons = {};
+
+    for(var b = 0; b < formButtons.length; b++){
+        if(!relevantButtons[formButtons[b].getAttribute("initial_id")]){
+            relevantButtons[formButtons[b].getAttribute("initial_id")] = true;
+        }        
+    }
+
+
+    for(var btn in relevantButtons){
+        var buttons = document.getElementsByName(btn + "_buttons");
+        var notSet = true;
+
+        for(var e = 0; e < buttons.length; e++){
+            if(buttons[e].className == "green"){
+                notSet = false;
+            }
+        }
+
+        if(notSet){
+            for(var e = 0; e < buttons.length; e++){
+                buttons[e].className = "red"
+            }
+            alert("Missing selection in non-optional question!");
+                
+            return false;
+        }
+    }
+
+    for(var i = 0; i < formInputs.length; i++){
+        if(formInputs[i].getAttribute("optional") != null){
+            if(formInputs[i].value.trim().length <= 0){
+                alert("Missing value in non-optional question!");
+                formInputs[i].className = "missingValue labelText textInput";
+                return false;
+            } else {
+                formInputs[i].className = "availableValue labelText textInput";
+            }
+        }
+    }
+
+    for(var i = 0; i < formTextAreas.length; i++){
+        if(formTextAreas[i].getAttribute("optional") == null){
+            if(formTextAreas[i].value.trim().length <= 0){
+                alert("Missing value in non-optional question!");
+                formTextAreas[i].className = "missingValue labelText textInput";
+                return false;
+            } else {
+                formTextAreas[i].className = "availableValue labelText textInput";
+            }
+        }
+    }
+
+    return true;
+}
+
+function createCalendarHTML(){
+
+    var table = document.createElement("table");
+    table.id = "calenderTable";
+
+    document.body.appendChild(table);
+
+    var tbody1 = document.createElement("tbody");
+    tbody1.id = "calenderTableHead";
+
+    table.appendChild(tbody1);
+
+    var tr1 = document.createElement("tr");
+
+    tbody1.appendChild(tr1);
+
+    var td1_1 = document.createElement("td");
+    td1_1.setAttribute("colspan", 4);
+    td1_1.align = "center";
+
+    tr1.appendChild(td1_1);
+
+    var selectMonth = document.createElement("select");
+    selectMonth.id = "selectMonth";
+    selectMonth.style.fontSize = "1.2em";
+    
+    selectMonth.onchange = function(){
+        showCalenderBody(createCalender(document.getElementById('selectYear').value,
+            this.selectedIndex, false));
+    }
+
+    var months = [[0, "Jan"],
+    [1, "Feb"],
+    [2, "Mar"],
+    [3, "Apr"],
+    [4, "May"],
+    [5, "Jun"],
+    [6, "Jul"],
+    [7, "Aug"],
+    [8, "Sep"],
+    [9, "Oct"],
+    [10, "Nov"],
+    [11, "Dec"]
+    ]
+
+    for(var month = 0; month < months.length; month++){
+        var opt = document.createElement("option");
+        opt.value = months[month][0];
+        opt.innerHTML = months[month][1];
+
+        selectMonth.appendChild(opt);
+    }
+
+    td1_1.appendChild(selectMonth);
+
+    var td1_2 = document.createElement("td");
+    td1_2.setAttribute("colspan", 2);
+    td1_2.align = "center";
+    
+    td1_2.innerHTML = "<select onChange=\"showCalenderBody(createCalender(this.value," +
+    " document.getElementById('selectMonth').selectedIndex, false));\"" +
+    " id=\"selectYear\" style=\"font-size:1.2em\"> " +
+    "</select>";
+
+    tr1.appendChild(td1_2);
+
+    var td1_3 = document.createElement("td");
+    td1_3.align = "center";
+
+    td1_3.innerHTML = "<a href=\"#\" onClick=\"closeCalender();\">" +
+    "<font color=\"#003333\" size=\"+1\">X</font>" +
+    "</a>";
+
+    tr1.appendChild(td1_3);
+
+    var tbody2 = document.createElement("tbody");
+    tbody2.id = "calenderTableDays";
+
+    table.appendChild(tbody2);
+
+    var tr2 = document.createElement("tr");
+
+    tbody2.appendChild(tr2);
+
+    tr2.innerHTML = '<td class="header-cell">Sun</td><td class="header-cell">Mon</td>' +
+    '<td class="header-cell">Tue</td><td class="header-cell">Wed</td>' +
+    '<td class="header-cell">Thu</td><td class="header-cell">Fri</td>' +
+    '<td class="header-cell">Sat</td>';
+
+    var tbody3 = document.createElement("tbody");
+    tbody3.id = "calender";
+
+    table.appendChild(tbody3);
+
+}
+
+function showSummary(){
+
+    document.forms[0].style.display = "none";
+
+    var cntr = document.createElement("div");
+    var headerText = "Entries Summary";
+    cntr.id = "cntr";
+
+    $("content").appendChild(cntr);
+
+    var divmain = document.createElement("div");
+    divmain.id = "divmain";
+
+    cntr.appendChild(divmain);
+
+    var divheader = document.createElement("div");
+    divheader.id = "divheader";
+    divheader.innerHTML = headerText;
+
+    divmain.appendChild(divheader);
+
+    var divcontent = document.createElement("div");
+    divcontent.id = "divcontent";
+
+    divmain.appendChild(divcontent);
+
+    var divInside = document.createElement("div");
+    divInside.id = "divScroller";
+
+    divcontent.appendChild(divInside);
+
+    var divnav = document.createElement("div");
+    divnav.id = "footer";
+
+    divmain.appendChild(divnav);
+
+    var btnNext = document.createElement("button");
+    btnNext.id = "btnNext";
+    btnNext.innerHTML = (tstCurrentPage >= sections.length - 1 ? "<span>Finish</span>" : "<span>Next</span>");
+    btnNext.style.cssFloat = "right";
+    btnNext.className = "green navButton";
+    btnNext.onclick = function(){
+        if(checkFields()){
+            tstCurrentPage += 1;
+            navigateTo(tstCurrentPage);
+            $("btnNext").innerHTML = (tstCurrentPage >= sections.length - 1? "<span>Finish</span>" : "<span>Next</span>");
+        }
+    }
+
+    divnav.appendChild(btnNext);
+
+    var btnClear = document.createElement("button");
+    btnClear.id = "btnClear";
+    btnClear.innerHTML = "<span>Clear</span>";
+    btnClear.style.cssFloat = "right";
+    btnClear.className = "blue navButton";
+    btnClear.onclick = function(){
+        $("frmAnswers").reset();
+        var formButtons = $("frmAnswers").getElementsByTagName("button");
+        var relevantButtons = {};
+
+        for(var b = 0; b < formButtons.length; b++){
+            if(!relevantButtons[formButtons[b].getAttribute("initial_id")]){
+                relevantButtons[formButtons[b].getAttribute("initial_id")] = true;
+            }
+        }
+
+        for(var btn in relevantButtons){
+            $(btn).selectedIndex = -1;
+            var buttons = document.getElementsByName(btn + "_buttons");
+
+            for(var e = 0; e < buttons.length; e++){
+                buttons[e].className = "blue";
+            }
+        }
+    }
+
+    //divnav.appendChild(btnClear);
+
+    var btnBack = document.createElement("button");
+    btnBack.id = "btnBack";
+    btnBack.innerHTML = "<span>Back</span>";
+    btnBack.style.cssFloat = "right";
+    btnBack.className = "blue navButton";
+    btnBack.style.display = (tstCurrentPage > 0 ? "block" : "none");
+    btnBack.onclick = function(){
+        tstCurrentPage -= 1;
+        navigateTo(tstCurrentPage);
+    }
+
+    divnav.appendChild(btnBack);
+
+    var btnCancel = document.createElement("button");
+    btnCancel.id = "btnCancel";
+    btnCancel.innerHTML = "<span>Cancel</span>";
+    btnCancel.style.cssFloat = "left";
+    btnCancel.className = "red navButton";
+    btnCancel.onclick = function(){
+        if(tt_cancel_destination){
+            window.location = tt_cancel_destination;
+        } else {
+            $("content").removeChild($("cntr"));
+            document.forms[0].style.display = "block";
+        }
+    }
+
+    divnav.appendChild(btnCancel);
+
+    var frm = document.createElement("form");
+    frm.id = "frmAnswers";
+    frm.setAttribute("autocomplete", "off");
+
+    divInside.appendChild(frm);
+
+    var tbl = document.createElement("table");
+    tbl.width = "95%";
+    tbl.cellSpacing = 1;
+    tbl.cellPadding = 2;
+
+    frm.appendChild(tbl);
+
+    var tbody = document.createElement("tbody");
+
+    tbl.appendChild(tbody);
+
+    elementIDs.sort();
+
+    for(var el = 0; el < elementIDs.length; el++){
+        var tr = document.createElement("tr");
+        var td1 = document.createElement("td");
+        var td2 = document.createElement("td");
+
+        tbody.appendChild(tr);
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+
+        td1.className = "labelText";
+
+        if($(elementIDs[el][1])){
+            console.log(elementIDs[el][1]);
+            
+            td1.innerHTML = "(" + (el) + "). <span style='text-decoration: underline;'>" +
+                ($(elementIDs[el][1]).getAttribute("helpText") != null ?
+                $(elementIDs[el][1]).getAttribute("helpText") : "") + "</span> : <i style='color: blue;'>" +
+                $(elementIDs[el][1]).value + "</i>";
+        }
+    }
+
+}
+
+function initMultipleQuestions(){
+    sections = getSections();
+
+    navigateTo(0);
+
+    createCalendarHTML();
+}
+
+window.addEventListener("load", initMultipleQuestions, false);
