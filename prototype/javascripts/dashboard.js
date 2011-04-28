@@ -194,16 +194,26 @@ function generateHomepage(){
             button.style.margin = "0px";
             button.style.marginTop = "5px";
             button.innerHTML = "<span>" + childlinks[j].innerHTML.trim() + "</span>";
-            button.setAttribute("link", childlinks[j].value);
+            button.setAttribute("link", childlinks[j].getAttribute("link"));
             if (j == 0) {
                 button.className = "red left";
+                button.id = "btnCancel";
                 button.onclick = function(){
-                    window.location = tt_cancel_destination;
+                    if(__$("btnCancel").getAttribute("link") != null){
+                        window.location = __$("btnCancel").getAttribute("link");
+                    } else {
+                        window.location = tt_cancel_destination;
+                    }                    
                 }
             } else if (j == 1) {
                 button.className = "green";
+                button.id = "btnNext";
                 button.onclick = function(){
-                    window.location = tt_cancel_show;
+                    if(__$("btnNext").getAttribute("link") != null){
+                        window.location = __$("btnNext").getAttribute("link");
+                    } else {
+                        window.location = tt_cancel_show;
+                    }
                 }
             } else {
                 button.className = "blue";
