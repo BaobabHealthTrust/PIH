@@ -1250,6 +1250,14 @@ function generatePage(action, method, section){
         input.name = "secondary_" + el;
         input.setAttribute("initial_id", el)
 
+        if($(el).getAttribute("validationRule") != null){
+            input.setAttribute("validationRule", $(el).getAttribute("validationRule"))
+        }
+
+        if($(el).getAttribute("validationMessage") != null){
+            input.setAttribute("validationMessage", $(el).getAttribute("validationMessage"))
+        }
+
         switch(actualElements[el][2]){
             case "number":
                 input.onclick = function(){
@@ -1460,7 +1468,13 @@ function checkFields(){
 
     for(var i = 0; i < formInputs.length; i++){
         if(formInputs[i].getAttribute("optional") == null){
-            if(formInputs[i].value.trim().length <= 0){
+            var validation = validateRule(formInputs[i]);
+
+            if(validation.trim().length > 0){
+                alert(validation);
+                formInputs[i].className = "missingValue labelText textInput";
+                return false;
+            } else if(formInputs[i].value.trim().length <= 0){
                 alert("Missing value in non-optional question!");
                 formInputs[i].className = "missingValue labelText textInput";
                 return false;
@@ -1472,7 +1486,13 @@ function checkFields(){
 
     for(var i = 0; i < formTextAreas.length; i++){
         if(formTextAreas[i].getAttribute("optional") == null){
-            if(formTextAreas[i].value.trim().length <= 0){
+            var validationText = validateRule(formTextAreas[i]);
+
+            if(validationText.trim().length > 0){
+                alert(validationText);
+                formInputs[i].className = "missingValue labelText textInput";
+                return false;
+            } else if(formTextAreas[i].value.trim().length <= 0){
                 alert("Missing value in non-optional question!");
                 formTextAreas[i].className = "missingValue labelText textInput";
                 return false;
@@ -1483,6 +1503,43 @@ function checkFields(){
     }
 
     return true;
+}
+
+function validateRule(aNumber) {
+	var aRule = aNumber.getAttribute("validationRule")
+	if (aRule==null) return ""
+
+	var re = new RegExp(aRule)
+	if (aNumber.value.search(re) ==-1){
+		var aMsg= aNumber.getAttribute("validationMessage")
+		if (aMsg ==null || aMsg=="")
+			return "Please enter a valid value"
+			else
+				return aMsg
+	}
+	return ""
+}
+
+function ajaxRequest(aElement, aUrl) {
+	var httpRequest = new XMLHttpRequest();
+	httpRequest.onreadystatechange = function() {
+		handleResult(aElement, httpRequest);
+	};
+	try {
+		httpRequest.open('GET', aUrl, true);
+		httpRequest.send(null);
+	} catch(e){
+	}
+}
+
+function handleResult(optionsList, aXMLHttpRequest) {
+	if (!aXMLHttpRequest) return;
+
+	if (!optionsList) return;
+
+	if (aXMLHttpRequest.readyState == 4 && aXMLHttpRequest.status == 200) {
+		optionsList.innerHTML = aXMLHttpRequest.responseText;
+        }
 }
 
 function createCalendarHTML(){
