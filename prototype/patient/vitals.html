@@ -22,7 +22,9 @@
                         <tr>
                             <td>Weight</td>
                             <td>
-                                <input type='text' value='' field_type='number' name='weight' id='weight' helptext='Weight' />
+                                <input type='text' value='' validationRule="^\d+(\.\d+)?$"
+                                       validationMessage="Please enter a valid numeric weight"
+                                       field_type='number' name='weight' id='weight' helptext='Weight' />
                             </td>
                         </tr>
                         <tr>
