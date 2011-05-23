@@ -1,3 +1,17 @@
+/*******************************************************************************
+ *
+ * Baobab Touchscreen Toolkit
+ *
+ * A library for transforming HTML pages into touch-friendly user interfaces.
+ *
+ * (c) 2011 Baobab Health Trust (http://www.baobabhealth.org)
+ *
+ * For lincense details, see the README.md file
+ *
+ * This file is part the Baobab Touchscreen Toolkit API
+ * 
+ ******************************************************************************/
+
 var patnum = ""
 var setFocusTimeout = 5000;
 var checkForBarcodeTimeout = 1500;
@@ -7,9 +21,9 @@ var barcodeId = null;
 var focusOnce = false;
 
 var title = "";
-var tt_cancel_show = null;
-var tt_cancel_destination = null;
-var tt_register_destination = null;
+var tt_cancel_show = (typeof(tt_cancel_show) == "undefined" ? null : tt_cancel_show);
+var tt_cancel_destination = (typeof(tt_cancel_destination) == "undefined" ? null : tt_cancel_destination);
+var tt_register_destination = (typeof(tt_register_destination) == "undefined" ? null : tt_register_destination);
 var heading = [];
 var controls = [];
 
@@ -554,6 +568,10 @@ function generateGeneralDashboard(){
 }
 
 function createPage(){
+    if(document.getElementById("loadingProgressMessage")){
+        document.body.removeChild(document.getElementById("loadingProgressMessage"));
+    }
+    
     if(__$('home')){
         generateHomepage();
     } else if(__$('dashboard')){
@@ -777,4 +795,4 @@ function checkForBarcode(validAction){
     window.setTimeout("checkForBarcode('" + validAction + "')", checkForBarcodeTimeout);
 }
 
-window.addEventListener("load", createPage, false);
+//window.addEventListener("load", createPage, false);

@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>Appointments</title>
-        <script type="text/javascript" language="javascript" src="../javascripts/transform.js" defer></script>
+        <script type="text/javascript" language="javascript" src="../javascripts/include.js" defer></script>
         <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
         <script language="javascript">
             tstUsername = "";
@@ -9,8 +9,6 @@
             tt_cancel_destination = 'tasks.html';
             tt_cancel_show = 'show.html';
         </script>
-        <link href="../stylesheets/transform.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
-        <link href="../stylesheets/dashboard.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
     </head>
     <body><div id='content'>
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
@@ -22,7 +20,8 @@
                         <tr>
                             <td>Time Until Next Appointment</td>
                             <td>
-                                <select style='width: 100%' position="a" name='time_until_next_appointment' id='time_until_next_appointment' helptext='Time Until Next Appointment'>
+                                <select style='width: 100%' position="a" name='time_until_next_appointment'
+                                        id='time_until_next_appointment' helptext='Time Until Next Appointment'>
                                     <option></option>
                                     <option>2 weeks</option>
                                     <option>1 month</option>

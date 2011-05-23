@@ -1,3 +1,17 @@
+/*******************************************************************************
+ *
+ * Baobab Touchscreen Toolkit
+ *
+ * A library for transforming HTML pages into touch-friendly user interfaces.
+ *
+ * (c) 2011 Baobab Health Trust (http://www.baobabhealth.org)
+ *
+ * For lincense details, see the README.md file
+ *
+ * This file is part the Baobab Touchscreen Toolkit API
+ *
+ ******************************************************************************/
+
 /* transform.js
  * Script to transform a normal form page to a multiquestion wizard page
 */
@@ -9,9 +23,9 @@ var sections = null;
 var tstCurrentPage = 0;
 var remoteNavigation = false;
 
-// utilities.js
 var global_control = null;
 var full_keyboard = false;
+var selectValue = "";
 
 // Array of max days in month in a year and in a leap year
 monthMaxDays	= [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -339,8 +353,67 @@ function getParentOffset(el, positions)
     return positions;
 }
 
+function ajaxRequest(aElement1, search, aUrl) {
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+        handleResult(aElement1, search, httpRequest);
+    };
+    try {
+        httpRequest.open('GET', aUrl, true);
+        httpRequest.send(null);
+    } catch(e){
+    }
+}
+
+function handleResult(optionsList, search, aXMLHttpRequest) {
+    if (!aXMLHttpRequest) return;
+
+    if (!optionsList) return;
+
+    if (aXMLHttpRequest.readyState == 4 && aXMLHttpRequest.status == 200) {
+        optionsList.innerHTML = "";
+
+        var initialControl = null;
+        
+        if($(global_control).getAttribute("initial_id") != null){
+            initialControl = $($(global_control).getAttribute("initial_id"));
+        }
+
+        if(initialControl != null){
+            initialControl.innerHTML = "";
+        }
+
+        if(optionsList.type.toUpperCase() == "SELECT-MULTIPLE" ||
+            optionsList.type.toUpperCase() == "SELECT-ONE"){
+
+            var result = aXMLHttpRequest.responseText.split("\n");
+
+            for(var i = 0; i < result.length; i++){
+                if(result[i].toUpperCase().match(search.toUpperCase())){
+                    var opt = document.createElement("option");
+                    opt.innerHTML = result[i];
+
+                    optionsList.appendChild(opt);
+                    
+                    if(initialControl != null){
+                        var optio = document.createElement("option");
+                        optio.innerHTML = result[i];
+                        
+                        initialControl.appendChild(optio);
+                    }
+                }
+            }
+
+        }
+    }
+}
+
 function checkCtrl(obj){
     var o = obj;
+
+    if(obj == null)
+        return null;
+
     var t = o.offsetTop;
     var l = o.offsetLeft + 1;
     var w = o.offsetWidth;
@@ -874,11 +947,11 @@ function showYear(id){
     document.body.appendChild(div);
 
 }
-
+/*
 function showMenu(id, original_id){
-
     if($("divMenu")){
         document.body.removeChild($("divMenu"));
+        return;
     }
 
     var p = checkCtrl($(id));
@@ -904,29 +977,753 @@ function showMenu(id, original_id){
     sel.style.width = "100%";
     sel.size = 10;
     sel.style.fontSize = "1.5em";
+    sel.id = "sel";
 
     div.appendChild(sel);
 
     sel.onclick = function(){
-        $(id).value = this[this.selectedIndex].innerHTML;
+        if(this.selectedIndex >= 0){
+            $(id).value = this[this.selectedIndex].innerHTML;
 
-        $(id).className = "availableValue labelText textInput";
-            
+            $(id).className = "availableValue labelText textInput";
+        }
+
         document.body.removeChild($("divMenu"));
     }
 
 
     document.body.appendChild(div);
 
-    for(var i = 0; i < $(original_id).options.length; i++){
-        var opt = document.createElement("option");
+    if($(original_id).getAttribute("ajaxURL") != null){
+        $(id).setAttribute("ajaxURL", $(original_id).getAttribute("ajaxURL"));
+    }
 
-        opt.value = $(original_id).options[i].value;
-        opt.innerHTML = $(original_id).options[i].innerHTML;
+    if($(id).getAttribute("ajaxURL") == null){
+        for(var i = 0; i < $(original_id).options.length; i++){
+            var opt = document.createElement("option");
 
-        sel.appendChild(opt);
+            opt.value = $(original_id).options[i].value;
+            opt.innerHTML = $(original_id).options[i].innerHTML;
+
+            sel.appendChild(opt);
+        }
+    } else {
+        showSelectKeyboard(id, "sel");
     }
 }
+
+function showSelectKeyboard(id, target){
+
+    if($("divKeyboardMenu")){
+        $("divMenu").removeChild($("divKeyboardMenu"));
+    }
+
+    var p = checkCtrl($(target));
+
+    var d = checkCtrl($("divScroller"));
+
+    $("divScroller").scrollTop = p[2] - d[2] - 10;
+
+    p = checkCtrl($(target));
+
+    var divMenu = $("divMenu");
+
+    var div = document.createElement("div");
+    div.id = "divKeyboardMenu";
+    div.style.position = "absolute";
+    div.style.left = (-295) + "px";
+
+    global_control = id;
+
+    assignValue($(global_control).value.trim());
+
+    var row1 = ["Q","W","E","R","T","Y","U","I","O","P"];
+    var row2 = ["A","S","D","F","G","H","J","K","L",":"];
+    var row3 = ["Z","X","C","V","B","N","M",",",".","?"];
+    var row4 = ["cap","space","clear",(full_keyboard?"enter":""),""];
+    var row5 = ["1","2","3","4","5","6","7","8","9","0"];
+    var row6 = ["_","-","@","(",")","+",";","=","\\","/"];
+
+    var tbl = document.createElement("table");
+    tbl.className = "keyBoardTable";
+    tbl.cellSpacing = 0;
+    tbl.cellPadding = 3;
+    tbl.id = "tblKeyboard";
+
+    var tr5 = document.createElement("tr");
+
+    for(var i = 0; i < row5.length; i++){
+        var td5 = document.createElement("td");
+        td5.align = "center";
+        td5.vAlign = "middle";
+        td5.style.cursor = "pointer";
+        td5.bgColor = "#ffffff";
+        td5.width = "30px";
+
+        tr5.appendChild(td5);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row5[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td5.appendChild(btn);
+
+    }
+
+    if(full_keyboard){
+        tbl.appendChild(tr5);
+    }
+
+    var tr1 = document.createElement("tr");
+
+    for(var i = 0; i < row1.length; i++){
+        var td1 = document.createElement("td");
+        td1.align = "center";
+        td1.vAlign = "middle";
+        td1.style.cursor = "pointer";
+        td1.bgColor = "#ffffff";
+        td1.width = "30px";
+
+        tr1.appendChild(td1);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row1[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td1.appendChild(btn);
+
+    }
+
+    tbl.appendChild(tr1);
+
+    var tr2 = document.createElement("tr");
+
+    for(var i = 0; i < row2.length; i++){
+        var td2 = document.createElement("td");
+        td2.align = "center";
+        td2.vAlign = "middle";
+        td2.style.cursor = "pointer";
+        td2.bgColor = "#ffffff";
+        td2.width = "30px";
+
+        tr2.appendChild(td2);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row2[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td2.appendChild(btn);
+
+    }
+
+    tbl.appendChild(tr2);
+
+    var tr3 = document.createElement("tr");
+
+    for(var i = 0; i < row3.length; i++){
+        var td3 = document.createElement("td");
+        td3.align = "center";
+        td3.vAlign = "middle";
+        td3.style.cursor = "pointer";
+        td3.bgColor = "#ffffff";
+        td3.width = "30px";
+
+        tr3.appendChild(td3);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row3[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td3.appendChild(btn);
+
+    }
+
+    tbl.appendChild(tr3);
+
+    var tr6 = document.createElement("tr");
+
+    for(var i = 0; i < row6.length; i++){
+        var td6 = document.createElement("td");
+        td6.align = "center";
+        td6.vAlign = "middle";
+        td6.style.cursor = "pointer";
+        td6.bgColor = "#ffffff";
+        td6.width = "30px";
+
+        tr6.appendChild(td6);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row6[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td6.appendChild(btn);
+
+    }
+
+    if(full_keyboard){
+        tbl.appendChild(tr6);
+    }
+
+    var tr4 = document.createElement("tr");
+
+    for(var i = 0; i < row4.length; i++){
+        var td4 = document.createElement("td");
+        td4.align = "center";
+        td4.vAlign = "middle";
+        td4.style.cursor = "pointer";
+        td4.bgColor = "#ffffff";
+
+        switch(row4[i]){
+            case "cap":
+                td4.colSpan = 2;
+                break;
+            case "space":
+                td4.colSpan = 2;
+                break;
+            case "clear":
+                td4.colSpan = 2;
+                break;
+            default:
+                td4.colSpan = 2;
+        }
+
+        tr4.appendChild(td4);
+
+        var btn = document.createElement("button");
+        btn.innerHTML = (row4[i].trim().length > 0 ? "<span>" + row4[i] + "</span>" : "");
+        btn.onclick = function(){
+            if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "cap"){
+                if(this.innerHTML.match(/<span>(.+)<\/span>/)[1] == "cap"){
+                    this.innerHTML = "<span>" + this.innerHTML.match(/<span>(.+)<\/span>/)[1].toUpperCase() + "</span>";
+
+                    var cells = $("tblKeyboard").getElementsByTagName("button");
+
+                    for(var c = 0; c < cells.length; c++){
+                        if(cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "cap"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "clear"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "space"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "full"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "basic" ){
+
+                            cells[c].innerHTML = "<span>" + cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() + "</span>";
+
+                        }
+                    }
+
+                } else {
+                    this.innerHTML = "<span>" + this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() + "</span>";
+
+                    var cells = $("tblKeyboard").getElementsByTagName("button");
+
+                    for(var c = 0; c < cells.length; c++){
+                        if(cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "cap"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "clear"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "space"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "full"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "basic" ){
+
+                            cells[c].innerHTML = "<span>" + cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toUpperCase() + "</span>";
+
+                        }
+                    }
+
+                }
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1] == "enter"){
+                if(!this.innerHTML.match(/^$/)){
+                    assignValue($(global_control).value +  "\n");
+                }
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "space"){
+
+                assignValue($(global_control).value +  " ");
+
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "clear"){
+
+                assignValue($(global_control).value.substring(0,$(global_control).value.length - 1));
+
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "full"){
+
+                full_keyboard = true;
+
+                showSelectKeyboard(global_control);
+
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "basic"){
+
+                full_keyboard = false;
+
+                showSelectKeyboard(global_control);
+
+            } else if(!this.innerHTML.match(/<span>(.+)<\/span>/)[1].match(/^$/)){
+
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+
+            }
+        }
+
+        if(row4[i].trim().length > 0) {
+            td4.appendChild(btn);
+        } else {
+            td4.innerHTML = "&nbsp;";
+        }
+
+    }
+
+    tbl.appendChild(tr4);
+
+    div.appendChild(tbl);
+    divMenu.appendChild(div);
+
+    var u = checkCtrl(div);
+    p = checkCtrl($(target));
+
+    if(u[3] > ((d[0]/2)+d[3])){
+        div.style.left = (parseInt(p[3]) - parseInt(u[0]) + parseInt(p[0]))+"px";
+    } else if((parseInt(u[3]) + parseInt(u[0])) > (parseInt(d[3])+parseInt(d[0]))){
+        div.style.left = (parseInt(d[3]) - parseInt(u[0]) + parseInt(d[0]))+"px";
+    }
+
+}
+
+function assignValue(value){
+    $(global_control).value = value;
+
+    if($(global_control).getAttribute("ajaxURL") != null){
+        ajaxRequest($('sel'), $(global_control).value.trim(), $(global_control).getAttribute('ajaxURL'));
+    }
+}
+*/
+
+function showMenu(id, original_id){
+
+    if($("divMenu")){
+        document.body.removeChild($("divMenu"));
+        selectValue = "";
+        return;
+    }
+
+    var p = checkCtrl($(id));
+
+    var d = checkCtrl($("divScroller"));
+
+    $("divScroller").scrollTop = p[2] - d[2] - 10;
+
+    p = checkCtrl($(id));
+
+    var div = document.createElement("div");
+    div.id = "divMenu";
+    div.style.top = "px";
+    div.style.zIndex = 1001;
+    div.style.backgroundColor = "#EEEEEE";
+    div.style.top = p[2] + p[1] - $("divScroller").scrollTop;
+    div.style.width = p[0];
+    div.style.left = p[3];
+    div.style.position = "absolute";
+
+    var sel = document.createElement("select");
+    sel.style.height = "200px";
+    sel.style.width = "100%";
+    sel.size = 10;
+    sel.style.fontSize = "1.5em";
+    sel.id = "sel";
+
+    div.appendChild(sel);
+
+    sel.onclick = function(){
+        if(this.selectedIndex >= 0){
+            $(id).value = this[this.selectedIndex].innerHTML;
+
+            $(id).className = "availableValue labelText textInput";
+        }
+
+        document.body.removeChild($("divMenu"));
+    }
+
+
+    document.body.appendChild(div);
+
+    if($(original_id).getAttribute("ajaxURL") != null){
+        $(id).setAttribute("ajaxURL", $(original_id).getAttribute("ajaxURL"));
+    }
+
+    if($(id).getAttribute("ajaxURL") == null){
+        for(var i = 0; i < $(original_id).options.length; i++){
+            var opt = document.createElement("option");
+
+            opt.value = $(original_id).options[i].value;
+            opt.innerHTML = $(original_id).options[i].innerHTML;
+
+            sel.appendChild(opt);
+        }
+        showSelectKeyboard(id, "sel");
+    } else {
+        showSelectKeyboard(id, "sel");
+    }
+}
+
+function showSelectKeyboard(id, target){
+
+    if($("divKeyboardMenu")){
+        $("divMenu").removeChild($("divKeyboardMenu"));
+    }
+
+    var p = checkCtrl($(id));
+
+    var d = checkCtrl($("divScroller"));
+
+    $("divScroller").scrollTop = p[2] - d[2] - 10;
+
+    p = checkCtrl($(id));
+
+    var divMenu = $("divMenu");
+
+    var div = document.createElement("div");
+    div.id = "divKeyboardMenu";
+    div.style.position = "absolute";
+    div.style.left = (-295) + "px";
+
+    global_control = id;
+
+    assignValue($(global_control).value.trim());
+
+    var row1 = ["Q","W","E","R","T","Y","U","I","O","P"];
+    var row2 = ["A","S","D","F","G","H","J","K","L",":"];
+    var row3 = ["Z","X","C","V","B","N","M",",",".","?"];
+    var row4 = ["cap","space","clear",(full_keyboard?"enter":""),""];
+    var row5 = ["1","2","3","4","5","6","7","8","9","0"];
+    var row6 = ["_","-","@","(",")","+",";","=","\\","/"];
+
+    var tbl = document.createElement("table");
+    tbl.className = "keyBoardTable";
+    tbl.cellSpacing = 0;
+    tbl.cellPadding = 3;
+    tbl.id = "tblKeyboard";
+
+    var tr5 = document.createElement("tr");
+
+    for(var i = 0; i < row5.length; i++){
+        var td5 = document.createElement("td");
+        td5.align = "center";
+        td5.vAlign = "middle";
+        td5.style.cursor = "pointer";
+        td5.bgColor = "#ffffff";
+        td5.width = "30px";
+
+        tr5.appendChild(td5);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row5[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                selectValue += this.innerHTML.match(/<span>(.+)<\/span>/)[1];
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td5.appendChild(btn);
+
+    }
+
+    if(full_keyboard){
+        tbl.appendChild(tr5);
+    }
+
+    var tr1 = document.createElement("tr");
+
+    for(var i = 0; i < row1.length; i++){
+        var td1 = document.createElement("td");
+        td1.align = "center";
+        td1.vAlign = "middle";
+        td1.style.cursor = "pointer";
+        td1.bgColor = "#ffffff";
+        td1.width = "30px";
+
+        tr1.appendChild(td1);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row1[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                selectValue += this.innerHTML.match(/<span>(.+)<\/span>/)[1];
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td1.appendChild(btn);
+
+    }
+
+    tbl.appendChild(tr1);
+
+    var tr2 = document.createElement("tr");
+
+    for(var i = 0; i < row2.length; i++){
+        var td2 = document.createElement("td");
+        td2.align = "center";
+        td2.vAlign = "middle";
+        td2.style.cursor = "pointer";
+        td2.bgColor = "#ffffff";
+        td2.width = "30px";
+
+        tr2.appendChild(td2);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row2[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                selectValue += this.innerHTML.match(/<span>(.+)<\/span>/)[1];
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td2.appendChild(btn);
+
+    }
+
+    tbl.appendChild(tr2);
+
+    var tr3 = document.createElement("tr");
+
+    for(var i = 0; i < row3.length; i++){
+        var td3 = document.createElement("td");
+        td3.align = "center";
+        td3.vAlign = "middle";
+        td3.style.cursor = "pointer";
+        td3.bgColor = "#ffffff";
+        td3.width = "30px";
+
+        tr3.appendChild(td3);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row3[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                selectValue += this.innerHTML.match(/<span>(.+)<\/span>/)[1];
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td3.appendChild(btn);
+
+    }
+
+    tbl.appendChild(tr3);
+
+    var tr6 = document.createElement("tr");
+
+    for(var i = 0; i < row6.length; i++){
+        var td6 = document.createElement("td");
+        td6.align = "center";
+        td6.vAlign = "middle";
+        td6.style.cursor = "pointer";
+        td6.bgColor = "#ffffff";
+        td6.width = "30px";
+
+        tr6.appendChild(td6);
+
+        var btn = document.createElement("button");
+        btn.className = "blue";
+        btn.innerHTML = "<span>" + row6[i] + "</span>";
+        btn.onclick = function(){
+            if(!this.innerHTML.match(/^$/)){
+                selectValue += this.innerHTML.match(/<span>(.+)<\/span>/)[1];
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+            }
+        }
+
+        td6.appendChild(btn);
+
+    }
+
+    if(full_keyboard){
+        tbl.appendChild(tr6);
+    }
+
+    var tr4 = document.createElement("tr");
+
+    for(var i = 0; i < row4.length; i++){
+        var td4 = document.createElement("td");
+        td4.align = "center";
+        td4.vAlign = "middle";
+        td4.style.cursor = "pointer";
+        td4.bgColor = "#ffffff";
+
+        switch(row4[i]){
+            case "cap":
+                td4.colSpan = 2;
+                break;
+            case "space":
+                td4.colSpan = 2;
+                break;
+            case "clear":
+                td4.colSpan = 2;
+                break;
+            default:
+                td4.colSpan = 2;
+        }
+
+        tr4.appendChild(td4);
+
+        var btn = document.createElement("button");
+        btn.innerHTML = (row4[i].trim().length > 0 ? "<span>" + row4[i] + "</span>" : "");
+        btn.onclick = function(){
+            if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "cap"){
+                if(this.innerHTML.match(/<span>(.+)<\/span>/)[1] == "cap"){
+                    this.innerHTML = "<span>" + this.innerHTML.match(/<span>(.+)<\/span>/)[1].toUpperCase() + "</span>";
+
+                    var cells = $("tblKeyboard").getElementsByTagName("button");
+
+                    for(var c = 0; c < cells.length; c++){
+                        if(cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "cap"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "clear"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "space"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "full"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "basic" ){
+
+                            cells[c].innerHTML = "<span>" + cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() + "</span>";
+
+                        }
+                    }
+
+                } else {
+                    this.innerHTML = "<span>" + this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() + "</span>";
+
+                    var cells = $("tblKeyboard").getElementsByTagName("button");
+
+                    for(var c = 0; c < cells.length; c++){
+                        if(cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "cap"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "clear"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "space"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "full"
+                            && cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() != "basic" ){
+
+                            cells[c].innerHTML = "<span>" + cells[c].innerHTML.match(/<span>(.+)<\/span>/)[1].toUpperCase() + "</span>";
+
+                        }
+                    }
+
+                }
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1] == "enter"){
+                if(!this.innerHTML.match(/^$/)){
+                    selectValue += "\n";
+                    assignValue($(global_control).value +  "\n");
+                }
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "space"){
+
+                selectValue += " ";
+                assignValue($(global_control).value +  " ");
+
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "clear"){
+
+                selectValue = selectValue.substring(0, selectValue.length - 1);
+                assignValue($(global_control).value.substring(0,$(global_control).value.length - 1));
+
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "full"){
+
+                full_keyboard = true;
+
+                showSelectKeyboard(global_control);
+
+            } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "basic"){
+
+                full_keyboard = false;
+
+                showSelectKeyboard(global_control);
+
+            } else if(!this.innerHTML.match(/<span>(.+)<\/span>/)[1].match(/^$/)){
+
+                selectValue += this.innerHTML.match(/<span>(.+)<\/span>/)[1];
+                assignValue($(global_control).value +  this.innerHTML.match(/<span>(.+)<\/span>/)[1]);
+
+            }
+        }
+
+        if(row4[i].trim().length > 0) {
+            td4.appendChild(btn);
+        } else {
+            td4.innerHTML = "&nbsp;";
+        }
+
+    }
+
+    tbl.appendChild(tr4);
+
+    div.appendChild(tbl);
+    divMenu.appendChild(div);
+
+    var u = checkCtrl(div);
+    p = checkCtrl($(target));
+
+/*
+    if(u[3] > ((d[0]/2)+d[3])){
+        div.style.left = (parseInt(p[3]) - parseInt(u[0]) + parseInt(p[0]))+"px";
+    } else if((parseInt(u[3]) + parseInt(u[0])) > (parseInt(d[3])+parseInt(d[0]))){
+        div.style.left = (parseInt(d[3]) - parseInt(u[0]) + parseInt(d[0]))+"px";
+    }
+*/
+}
+
+function assignValue(value){
+    $(global_control).value = value;
+
+    if($(global_control).getAttribute("ajaxURL") != null){
+        ajaxRequest($('sel'), $(global_control).value.trim(), $(global_control).getAttribute('ajaxURL'));
+    } else {
+        filterSelection(global_control);
+    }
+}
+
+function filterSelection(id){
+    var old_id = $(id).getAttribute("initial_id");
+
+    if(old_id == null)
+        return;
+    
+    if($(old_id).type.toUpperCase() == "SELECT-MULTIPLE" ||
+        $(old_id).type.toUpperCase() == "SELECT-ONE"){
+
+        var result = $(old_id).options;
+        $('sel').innerHTML = "";
+
+        for(var i = 0; i < result.length; i++){
+            if(result[i].innerHTML.toUpperCase().match(selectValue.toUpperCase())){
+                var opt = document.createElement("option");
+                opt.innerHTML = result[i].innerHTML;
+
+                $('sel').appendChild(opt);
+            }
+        }
+
+    }
+}
+
 
 function getSections(){
     return document.forms[0].getElementsByTagName("table");
@@ -1081,7 +1878,7 @@ function generatePage(action, method, section){
 
     var cntr = document.createElement("div");
     var headerText = (document.forms[0].getAttribute("headerLabel") ? document.forms[0].getAttribute("headerLabel") : "&nbsp;") +
-        " - (" + (tstCurrentPage + 1) + " of " + sections.length + ")";
+    " - (" + (tstCurrentPage + 1) + " of " + sections.length + ")";
     cntr.id = "cntr";
 
     $("content").appendChild(cntr);
@@ -1209,6 +2006,8 @@ function generatePage(action, method, section){
         var tr = document.createElement("tr");
         var td1 = document.createElement("td");
         var td2 = document.createElement("td");
+        td2.style.width = "50%";
+        
         var found_long = false;
         
         tbody.appendChild(tr);
@@ -1342,7 +2141,7 @@ function generatePage(action, method, section){
         }
 
         // Add buttons if options are less than 3
-        if($(el).tagName == "SELECT"){
+        if($(el).tagName == "SELECT" && $(el).getAttribute("ajaxURL") == null){
 
             //Check if select control options have long values
             found_long = false;
@@ -1506,40 +2305,18 @@ function checkFields(){
 }
 
 function validateRule(aNumber) {
-	var aRule = aNumber.getAttribute("validationRule")
-	if (aRule==null) return ""
+    var aRule = aNumber.getAttribute("validationRule")
+    if (aRule==null) return ""
 
-	var re = new RegExp(aRule)
-	if (aNumber.value.search(re) ==-1){
-		var aMsg= aNumber.getAttribute("validationMessage")
-		if (aMsg ==null || aMsg=="")
-			return "Please enter a valid value"
-			else
-				return aMsg
-	}
-	return ""
-}
-
-function ajaxRequest(aElement, aUrl) {
-	var httpRequest = new XMLHttpRequest();
-	httpRequest.onreadystatechange = function() {
-		handleResult(aElement, httpRequest);
-	};
-	try {
-		httpRequest.open('GET', aUrl, true);
-		httpRequest.send(null);
-	} catch(e){
-	}
-}
-
-function handleResult(optionsList, aXMLHttpRequest) {
-	if (!aXMLHttpRequest) return;
-
-	if (!optionsList) return;
-
-	if (aXMLHttpRequest.readyState == 4 && aXMLHttpRequest.status == 200) {
-		optionsList.innerHTML = aXMLHttpRequest.responseText;
-        }
+    var re = new RegExp(aRule)
+    if (aNumber.value.search(re) ==-1){
+        var aMsg= aNumber.getAttribute("validationMessage")
+        if (aMsg ==null || aMsg=="")
+            return "Please enter a valid value"
+        else
+            return aMsg
+    }
+    return ""
 }
 
 function createCalendarHTML(){
@@ -1645,7 +2422,7 @@ function showSummary(){
 
     var cntr = document.createElement("div");
     var headerText = (document.forms[0].getAttribute("headerLabel") ? document.forms[0].getAttribute("headerLabel") : "&nbsp;") +
-        " Summary";
+    " Summary";
     cntr.id = "cntr";
 
     $("content").appendChild(cntr);
@@ -1788,21 +2565,25 @@ function showSummary(){
             }
             
             td1.innerHTML = "<div style='padding: 10px; color: #333;'><div class='question'>(" +
-                (parseInt($(elementIDs[el][1]).getAttribute("section")) + 1) + "." +
-                pages[$(elementIDs[el][1]).getAttribute("section")].length +
-                "). <a href='#' onclick='tstCurrentPage = " +
-                $(elementIDs[el][1]).getAttribute("section") + "; navigateTo(" +
-                $(elementIDs[el][1]).getAttribute("section") + ");'>" +
-                ($(elementIDs[el][1]).getAttribute("helpText") != null ?
+            (parseInt($(elementIDs[el][1]).getAttribute("section")) + 1) + "." +
+            pages[$(elementIDs[el][1]).getAttribute("section")].length +
+            "). <a href='#' onclick='tstCurrentPage = " +
+            $(elementIDs[el][1]).getAttribute("section") + "; navigateTo(" +
+            $(elementIDs[el][1]).getAttribute("section") + ");'>" +
+            ($(elementIDs[el][1]).getAttribute("helpText") != null ?
                 $(elementIDs[el][1]).getAttribute("helpText") : "") + "</a> :</div> <div class='summary'><i>" +
-                ($(elementIDs[el][1]).value.trim().length > 0 ? $(elementIDs[el][1]).value : "&nbsp;") +
-                "</i></div></div>";
+            ($(elementIDs[el][1]).value.trim().length > 0 ? $(elementIDs[el][1]).value : "&nbsp;") +
+            "</i></div></div>";
         }
     }
 
 }
 
 function initMultipleQuestions(){
+    if(document.getElementById("loadingProgressMessage")){
+        document.body.removeChild(document.getElementById("loadingProgressMessage"));
+    }
+    
     sections = getSections();
 
     navigateTo(0);
@@ -1810,4 +2591,4 @@ function initMultipleQuestions(){
     createCalendarHTML();
 }
 
-window.addEventListener("load", initMultipleQuestions, false);
+//window.addEventListener("load", initMultipleQuestions, false);

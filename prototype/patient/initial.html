@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>Initial</title>
-        <script type="text/javascript" language="javascript" src="../javascripts/transform.js" defer></script>
+        <script type="text/javascript" language="javascript" src="../javascripts/include.js" defer></script>
         <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
         <script language="javascript">
             tstUsername = "";
@@ -9,8 +9,6 @@
             tt_cancel_destination = 'tasks.html';
             tt_cancel_show = 'show.html';
         </script>
-        <link href="../stylesheets/transform.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
-        <link href="../stylesheets/dashboard.css?1266397276" media="screen" rel="stylesheet" type="text/css" />
     </head>
     <body><div id='content'>
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
@@ -42,7 +40,10 @@
                         <tr>
                             <td>Location Of Art Initialisation</td>
                             <td>
-                                <select position='p' style='width: 100%' name='location_of_art_initialisation' id='location_of_art_initialisation' helptext='Location Of Art Initialisation' condition='$("ever_received_art?").value == "Yes"'>
+                                <select position='p' style='width: 100%' name='location_of_art_initialisation' 
+                                        id='location_of_art_initialisation'
+                                        helptext='Location Of Art Initialisation' ajaxURL="facilities.txt"
+                                        condition='$("ever_received_art?").value == "Yes"'>
                                     <option></option>
                                     <option>Facilities List</option>
                                 </select>
@@ -119,7 +120,8 @@
                         <tr>
                             <td>Type Of First Positive Hiv Test</td>
                             <td>
-                                <select position='y' style='width: 100%' name='type_of_first_positive_hiv_test' id='type_of_first_positive_hiv_test' helptext='Type Of First Positive Hiv Test' condition='$("ever_received_art?").value == "Yes"'>
+                                <select position='y' style='width: 100%' name='type_of_first_positive_hiv_test'
+                                        id='type_of_first_positive_hiv_test' helptext='Type Of First Positive Hiv Test' condition='$("ever_received_art?").value == "Yes"'>
                                     <option></option>
                                     <option>HIV Rapid Test, Qualitative</option>
                                     <option>HIV DNA Polymerase Chain Reaction</option>
@@ -130,9 +132,17 @@
                         <tr>
                             <td>Location Of First Positive Hiv Test</td>
                             <td>
-                                <select position='z' style='width: 100%' name='location_of_first_positive_hiv_test' id='location_of_first_positive_hiv_test' helptext='Location Of First Positive Hiv Test' condition='$("ever_received_art?").value == "Yes"'>
+                                <select position='z' style='width: 100%' name='location_of_first_positive_hiv_test' 
+                                        id='location_of_first_positive_hiv_test' helptext='Location Of First Positive Hiv Test'
+                                        condition='$("ever_received_art?").value == "Yes"' ajaxURL="facilities.txt">
                                     <option></option>
-                                    <option>Facilities List</option>
+                                    <option>QECH</option>
+                                    <option>KCH</option>
+                                    <option>ZCH</option>
+                                    <option>MCH</option>
+                                    <option>Bwaila</option>
+                                    <option>Mchinji</option>
+                                    <option>Ntcheu</option>
                                 </select>
                             </td>
                         </tr>
